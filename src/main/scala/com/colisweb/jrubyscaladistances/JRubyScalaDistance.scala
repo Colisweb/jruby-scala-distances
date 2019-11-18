@@ -25,7 +25,7 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
     val logger   = LoggerFactory.getLogger(classOf[OkHttpRequestHandler])
     val loggingF = (message: String) => logger.debug(message.replaceAll("key=([^&]*)&", "key=REDACTED&"))
 
-    val gdp = GoogleDistanceProvider[IO](
+    val distanceProvider = GoogleDistanceProvider[IO](
       GoogleGeoApiContext(
         googleApiConfig.apiKey,
         googleApiConfig.connectTimeout,
@@ -40,21 +40,23 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
       Some(redisConfig.expirationTimeout)
     )
     DistanceApi[IO, GoogleDistanceProviderError](
-      gdp.distance,
-      gdp.batchDistances,
+      distanceProvider.distance,
+      distanceProvider.batchDistances,
       cache.caching,
       cache.get
     )
   }
 
-  val travelMode: TravelMode = TravelMode.Driving
+  def getDrivingDistance(
+      origin: LatLong,
+      destination: LatLong,
+      travelMode: TravelMode = TravelMode.Driving
+  ): Either[GoogleDistanceProviderError, Types.Distance] = {
 
-  def getDrivingDistance(origin: LatLong, destination: LatLong): Either[GoogleDistanceProviderError, Types.Distance] = {
-
-    distanceApi.distance(origin, destination, List(travelMode)).unsafeRunSync().get(travelMode) match {
-      case Some(distanceEither) => distanceEither
-      case _                    => throw new RuntimeException("Unknown travelMode exception append")
-    }
+    distanceApi
+      .distance(origin, destination, List(travelMode))
+      .unsafeRunSync()
+      .getOrElse(travelMode, throw new RuntimeException("Unknown travelMode exception happened"))
   }
 }
 
