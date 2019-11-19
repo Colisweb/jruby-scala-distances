@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.util.Try
 
 final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisConfig: RedisConfiguration) {
 
@@ -47,17 +48,24 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
     )
   }
 
-  def getDrivingDistance(
+  def getDistance(
       origin: LatLong,
       destination: LatLong,
-      travelMode: TravelMode = TravelMode.Driving
-  ): Either[GoogleDistanceProviderError, Types.Distance] = {
+      travelMode: TravelMode
+  ): Try[Types.Distance] = {
 
     distanceApi
       .distance(origin, destination, List(travelMode))
       .unsafeRunSync()
-      .getOrElse(travelMode, throw new RuntimeException("Unknown travelMode exception happened"))
+      .getOrElse(travelMode, Left(new RuntimeException("Unknown travelMode exception happened")))
+      .toTry
   }
+
+  def getDrivingDistance(
+      origin: LatLong,
+      destination: LatLong
+  ): Try[Types.Distance] = getDistance(origin, destination, TravelMode.Driving)
+
 }
 
 object JRubyScalaDistance {
