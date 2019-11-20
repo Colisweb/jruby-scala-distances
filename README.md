@@ -1,18 +1,19 @@
 
 # JRuby Scala Distances  
   
-JRuby Scala Distances is simple interface to use ScalaDistance from JRuby.  
+JRuby Scala Distances is a simple interface to use ScalaDistance from JRuby.  
 
 ## Why ?
 
-JRuby Scala Distances  allow us to use the lib ScalaDistance directly from you jruby code. 
-For example, it's not possible to get a TravelMode from directly from ScalaDistance, and it's easier to use.
+In JRuby, it's impossible to use the library ScalaDistance directly from your code. For example you cant get a TravelMode
+directly from JRuby.
+Also, you don't have to pass the required implicit ContextShift to call ScalaDistance.
 
-Also, you don't have to pass the implicit required ContextShift to call it.
+So with JRuby Scala Distances you don't have to deal with this kind of problem.
 
 ## How to use it ?
 
-Simpy create a RedisConfiguration and a googleApiConfiguration object like this : 
+Simpy create a RedisConfiguration and a googleApiConfiguration object : 
 
     redisConfig = RedisConfiguration.new(  
       redis_host, # host  
@@ -45,4 +46,3 @@ Simpy create a RedisConfiguration and a googleApiConfiguration object like this 
         -> (failure) { failure },  
         -> (distance) { Success({ distance: distance.length.value, duration: distance.duration.toMinutes }) }  
       )
-
