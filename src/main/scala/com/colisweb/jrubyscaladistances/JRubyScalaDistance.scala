@@ -52,14 +52,13 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
       origin: LatLong,
       destination: LatLong,
       travelMode: TravelMode
-  ): Try[Types.Distance] = {
-
+  ): Try[Types.Distance] = 
     distanceApi
       .distance(origin, destination, List(travelMode))
       .unsafeRunSync()
       .getOrElse(travelMode, Left(new RuntimeException("Unknown travelMode exception happened")))
       .toTry
-  }
+
 
   def getDrivingDistance(
       origin: LatLong,
