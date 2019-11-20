@@ -67,26 +67,3 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
   ): Try[Types.Distance] = getDistance(origin, destination, TravelMode.Driving)
 
 }
-
-object JRubyScalaDistance {
-
-  def redisConfiguration(host: String, port: Int, expirationTimeout: Duration): RedisConfiguration =
-    RedisConfiguration(
-      host = Refined.unsafeApply(host),
-      port = Refined.unsafeApply(port),
-      expirationTimeout = expirationTimeout
-    )
-
-  def googleApiConfiguration(
-      apiKey: String,
-      connectTimeout: FiniteDuration,
-      readTimeout: FiniteDuration,
-      queryRateLimit: Int
-  ): GoogleApiConfiguration = GoogleApiConfiguration(
-    apiKey = Refined.unsafeApply(apiKey),
-    connectTimeout = connectTimeout,
-    readTimeout = readTimeout,
-    queryRateLimit = Refined.unsafeApply(queryRateLimit)
-  )
-
-}
