@@ -51,3 +51,12 @@ Now you can call the method `getDrivingDistance` like this :
         -> (distance) { Success({ distance: distance.length.value, duration: distance.duration.toMinutes }) }  
       )
 ```
+
+
+Then don't forget to add an `at_exit` in your ruby code to cleanup all threads at exits :
+
+```ruby
+at_exit do
+  scalaDistanceApi.shutdown if scalaDistanceApi.present?
+end
+```
