@@ -42,7 +42,9 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
       distanceProvider.distance,
       distanceProvider.batchDistances,
       cache.caching,
-      cache.get
+      cache.get,
+      // reuse the same key as in scala-distance 3.x
+      directedPath => Seq(directedPath.travelMode, directedPath.origin, directedPath.destination, None)
     )
   }
 

@@ -1,0 +1,15 @@
+include:
+  - 'https://gitlab.com/colisweb-open-source/ci-common/raw/v7.8.2/templates/scala.yml'
+
+compile:
+  extends: .sbt-compile
+  tags: []
+
+version:
+  extends: .version
+  tags: []
+
+publish on bintray:
+  extends: .bintray-publish
+  tags: []
+

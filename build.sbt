@@ -9,7 +9,10 @@ scalafmtSbtCheck := true
 lazy val root = Project(id = "JRubyScalaDistances", base = file("."))
   .settings(libraryDependencies ++= scalaDistancesLibraries)
 
-lazy val scalaDistancesVersion = "3.0.1"
+resolvers += Resolver.bintrayRepo("colisweb", "maven")
+
+
+lazy val scalaDistancesVersion = "4.0.1"
 
 lazy val scalaDistancesLibraries = Seq(
   "com.colisweb" %% "scala-distances-core"            % scalaDistancesVersion,
@@ -20,15 +23,13 @@ lazy val scalaDistancesLibraries = Seq(
 
 inThisBuild(
   List(
-    credentials += Credentials(Path.userHome / ".bintray" / ".credentials"),
     licenses := Seq(
       "Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")
     ),
     homepage := Some(
-      url("https://gitlab.com/colisweb-open-source/jruby-scala-distances")
+      url("https://gitlab.com/colisweb-open-source/scala/jruby-scala-distances")
     ),
     bintrayOrganization := Some("colisweb"),
-    bintrayReleaseOnPublish := true,
     scalacOptions += "-Yresolve-term-conflict:object",
     publishMavenStyle := true
   )
