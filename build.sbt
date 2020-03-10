@@ -17,8 +17,7 @@ lazy val scalaDistancesVersion = "4.0.1"
 lazy val scalaDistancesLibraries = Seq(
   "com.colisweb" %% "scala-distances-core"            % scalaDistancesVersion,
   "com.colisweb" %% "scala-distances-provider-google" % scalaDistancesVersion,
-  "com.colisweb" %% "scala-distances-cache-redis"     % scalaDistancesVersion,
-  "com.colisweb" %% "scala-distances-cache-noCache"   % scalaDistancesVersion
+  "com.colisweb" %% "scala-distances-cache-redis"     % scalaDistancesVersion
 )
 
 inThisBuild(
