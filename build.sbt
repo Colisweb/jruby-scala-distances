@@ -11,7 +11,6 @@ lazy val root = Project(id = "JRubyScalaDistances", base = file("."))
 
 resolvers += Resolver.bintrayRepo("colisweb", "maven")
 
-
 lazy val scalaDistancesVersion = "4.0.1"
 
 lazy val scalaDistancesLibraries = Seq(
