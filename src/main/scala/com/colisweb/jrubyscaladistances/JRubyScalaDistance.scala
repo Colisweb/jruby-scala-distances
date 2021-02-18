@@ -1,21 +1,29 @@
 package com.colisweb.jrubyscaladistances
 
 import cats.effect._
-import com.colisweb.distances.Types.LatLong
-import com.colisweb.distances.caches.RedisCache
+import com.colisweb.distances.caches.{RedisCache, RedisConfiguration}
+import com.colisweb.distances.model.path.DirectedPathWithModeAt
+import com.colisweb.distances.model.{DistanceAndDuration, Point, TravelMode}
+import com.colisweb.distances.providers.google.TrafficModel.BestGuess
 import com.colisweb.distances.providers.google.{
-  GoogleDistanceProvider,
-  GoogleDistanceProviderError,
+  GoogleDistanceDirectionsApi,
+  GoogleDistanceDirectionsProvider,
   GoogleGeoApiContext
 }
-import com.colisweb.distances.{DistanceApi, TravelMode, Types, _}
+import com.colisweb.distances.{DistanceApi, Distances}
 import com.google.maps.OkHttpRequestHandler
+import io.circe.Codec
+import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 import org.slf4j.LoggerFactory
+import scalacache.Flags
+import io.circe.generic.extras.defaults._
+import io.circe.generic.extras.semiauto._
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
-final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisConfig: RedisConfiguration) {
+final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisConfig: JRubyRedisConfiguration) {
 
   implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
@@ -30,39 +38,45 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
     loggingF
   )
 
-  val distanceApi: DistanceApi[IO, GoogleDistanceProviderError] = {
+  val distanceApi: DistanceApi[Try, DirectedPathWithModeAt] = {
 
-    val distanceProvider = GoogleDistanceProvider[IO](googleGeoApiContext)
+    import scalacache.modes.try_._
+    import scalacache.serialization.circe._
 
-    val cache = RedisCache[IO](
-      caches.RedisConfiguration(redisConfig.host, redisConfig.port),
-      Some(redisConfig.expirationTimeout)
-    )
-    DistanceApi[IO, GoogleDistanceProviderError](
-      distanceProvider.distance,
-      distanceProvider.batchDistances,
-      cache.caching,
-      cache.get,
-      // reuse the same key as in scala-distance 3.x
-      directedPath => Seq(directedPath.travelMode, directedPath.origin, directedPath.destination, None)
-    )
+    implicit val distanceAndDurationCodec: Codec[DistanceAndDuration] = deriveConfiguredCodec
+
+    val redisTtl = redisConfig.expirationTimeout match {
+      case duration: FiniteDuration => Some(duration)
+      case _                        => None
+    }
+
+    Distances
+      .from[Try, DirectedPathWithModeAt](
+        GoogleDistanceDirectionsApi.sync(googleGeoApiContext, BestGuess)(
+          GoogleDistanceDirectionsProvider.chooseMinimalDistanceRoute
+        )
+      )
+      .caching(
+        RedisCache(
+          RedisConfiguration(redisConfig.host, redisConfig.port),
+          Flags.defaultFlags,
+          redisTtl
+        )
+      )
+      .api
   }
 
-  def getDistance(
-      origin: LatLong,
-      destination: LatLong,
+  def getShortestDistance(
+      origin: Point,
+      destination: Point,
       travelMode: TravelMode
-  ): Try[Types.Distance] =
-    distanceApi
-      .distance(origin, destination, List(travelMode))
-      .unsafeRunSync()
-      .getOrElse(travelMode, Left(new RuntimeException("Unknown travelMode exception happened")))
-      .toTry
+  ): Try[DistanceAndDuration] =
+    distanceApi.distance(DirectedPathWithModeAt(origin, destination, travelMode, None))
 
-  def getDrivingDistance(
-      origin: LatLong,
-      destination: LatLong
-  ): Try[Types.Distance] = getDistance(origin, destination, TravelMode.Driving)
+  def getShortestDrivingDistance(
+      origin: Point,
+      destination: Point
+  ): Try[DistanceAndDuration] = getShortestDistance(origin, destination, TravelMode.Driving)
 
   def shutdown(): Unit = googleGeoApiContext.geoApiContext.shutdown()
 

@@ -2,7 +2,7 @@ package com.colisweb.jrubyscaladistances
 
 import scala.concurrent.duration.Duration
 
-final case class RedisConfiguration(
+final case class JRubyRedisConfiguration(
     host: String,
     port: Int,
     expirationTimeout: Duration

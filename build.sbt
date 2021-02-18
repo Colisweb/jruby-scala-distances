@@ -11,7 +11,7 @@ lazy val root = Project(id = "JRubyScalaDistances", base = file("."))
 
 resolvers += Resolver.bintrayRepo("colisweb", "maven")
 
-lazy val scalaDistancesVersion = "4.0.1"
+lazy val scalaDistancesVersion = "6.0.0"
 
 lazy val scalaDistancesLibraries = Seq(
   "com.colisweb" %% "scala-distances-core"            % scalaDistancesVersion,
@@ -29,6 +29,10 @@ inThisBuild(
     ),
     bintrayOrganization := Some("colisweb"),
     scalacOptions += "-Yresolve-term-conflict:object",
-    publishMavenStyle := true
+    publishMavenStyle := true,
+    isSnapshot := true,
+    pushRemoteCacheTo := Some(
+      MavenCache("local-cache", baseDirectory.value / sys.env.getOrElse("CACHE_PATH", "sbt-cache"))
+    )
   )
 )
