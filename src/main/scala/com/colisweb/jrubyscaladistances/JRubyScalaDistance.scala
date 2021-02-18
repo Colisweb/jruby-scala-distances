@@ -1,6 +1,5 @@
 package com.colisweb.jrubyscaladistances
 
-import cats.effect._
 import com.colisweb.distances.caches.{RedisCache, RedisConfiguration}
 import com.colisweb.distances.model.path.DirectedPathWithModeAt
 import com.colisweb.distances.model.{DistanceAndDuration, Point, TravelMode}
@@ -19,13 +18,10 @@ import scalacache.Flags
 import io.circe.generic.extras.defaults._
 import io.circe.generic.extras.semiauto._
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
 final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisConfig: JRubyRedisConfiguration) {
-
-  implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   val logger   = LoggerFactory.getLogger(classOf[OkHttpRequestHandler])
   val loggingF = (message: String) => logger.debug(message.replaceAll("key=([^&]*)&", "key=REDACTED&"))
