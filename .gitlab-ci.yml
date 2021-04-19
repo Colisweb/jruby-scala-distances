@@ -1,5 +1,5 @@
 include:
-  - 'https://gitlab.com/colisweb-open-source/ci-common/raw/v12.4.7/templates/scala.yml'
+  - 'https://colisweb-open-source.gitlab.io/ci-common/templates/scala.yml'
 
 compile:
   extends: .sbt-compile
@@ -13,7 +13,7 @@ version:
   extends: .version
   tags: []
 
-publish on bintray:
-  extends: .bintray-publish
+publish on sonatype:
+  extends: .sonatype-publish
   tags: []
 
