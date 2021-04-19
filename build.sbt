@@ -13,7 +13,7 @@ lazy val root = Project(id = "JRubyScalaDistances", base = file("."))
   .settings(libraryDependencies ++= scalaDistancesLibraries)
 
 
-lazy val scalaDistancesVersion = "6.0.0"
+lazy val scalaDistancesVersion = "6.1.0"
 
 lazy val scalaDistancesLibraries = Seq(
   "com.colisweb" %% "scala-distances-core"            % scalaDistancesVersion,
