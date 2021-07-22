@@ -1,4 +1,4 @@
-package com.colisweb.jrubyscaladistances
+package com.colisweb.jrubyscaladistances.google
 
 import scala.concurrent.duration.Duration
 

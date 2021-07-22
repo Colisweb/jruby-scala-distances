@@ -1,4 +1,4 @@
-package com.colisweb.jrubyscaladistances
+package com.colisweb.jrubyscaladistances.google
 
 import com.colisweb.distances.caches.{RedisCache, RedisConfiguration}
 import com.colisweb.distances.model.path.DirectedPathWithModeAt
@@ -10,24 +10,24 @@ import com.colisweb.distances.providers.google.{
   GoogleGeoApiContext
 }
 import com.colisweb.distances.{DistanceApi, Distances}
+import com.colisweb.jrubyscaladistances.JRubyRedisConfiguration
 import com.google.maps.OkHttpRequestHandler
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Codec
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import scalacache.Flags
-import io.circe.generic.extras.defaults._
-import io.circe.generic.extras.semiauto._
 
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
-final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisConfig: JRubyRedisConfiguration) {
+final class JRubyGoogleScalaDistance(googleApiConfig: GoogleApiConfiguration, redisConfig: JRubyRedisConfiguration) {
 
-  val logger   = LoggerFactory.getLogger(classOf[OkHttpRequestHandler])
-  val loggingF = (message: String) => logger.debug(message.replaceAll("key=([^&]*)&", "key=REDACTED&"))
+  val logger: Logger           = LoggerFactory.getLogger(classOf[OkHttpRequestHandler])
+  val loggingF: String => Unit = (message: String) => logger.debug(message.replaceAll("key=([^&]*)&", "key=REDACTED&"))
 
-  val googleGeoApiContext = GoogleGeoApiContext(
-    googleApiConfig.apiKey,
+  val googleGeoApiContext: GoogleGeoApiContext = GoogleGeoApiContext(
+    NonEmptyString.unsafeFrom(googleApiConfig.apiKey),
     googleApiConfig.connectTimeout,
     googleApiConfig.readTimeout,
     googleApiConfig.queryRateLimit,
@@ -38,6 +38,8 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
 
     import scalacache.modes.try_._
     import scalacache.serialization.circe._
+    import io.circe.generic.extras.defaults._
+    import io.circe.generic.extras.semiauto._
 
     implicit val distanceAndDurationCodec: Codec[DistanceAndDuration] = deriveConfiguredCodec
 
@@ -62,17 +64,17 @@ final class JRubyScalaDistance(googleApiConfig: GoogleApiConfiguration, redisCon
       .api
   }
 
+  def getShortestDrivingDistance(
+      origin: Point,
+      destination: Point
+  ): Try[DistanceAndDuration] = getShortestDistance(origin, destination, TravelMode.Car())
+
   def getShortestDistance(
       origin: Point,
       destination: Point,
       travelMode: TravelMode
   ): Try[DistanceAndDuration] =
     distanceApi.distance(DirectedPathWithModeAt(origin, destination, travelMode, None))
-
-  def getShortestDrivingDistance(
-      origin: Point,
-      destination: Point
-  ): Try[DistanceAndDuration] = getShortestDistance(origin, destination, TravelMode.Driving)
 
   def shutdown(): Unit = googleGeoApiContext.geoApiContext.shutdown()
 
