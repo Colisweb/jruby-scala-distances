@@ -12,7 +12,7 @@ ThisBuild / pushRemoteCacheTo := Some(
 lazy val root = Project(id = "JRubyScalaDistances", base = file("."))
   .settings(libraryDependencies ++= scalaDistancesLibraries)
 
-lazy val scalaDistancesVersion = "7.2.0"
+lazy val scalaDistancesVersion = "7.3.0"
 
 lazy val scalaDistancesLibraries = Seq(
   "com.colisweb" %% "scala-distances-core"            % scalaDistancesVersion,
