@@ -1,6 +1,7 @@
 organization := "com.colisweb"
 
-scalaVersion := "2.12.10"
+scalaVersion := "2.13.8"
+version := "7.4.0-SNAPSHOT"
 
 scalafmtOnCompile := true
 scalafmtCheck := true
